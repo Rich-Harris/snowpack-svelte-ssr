@@ -1,0 +1,19 @@
+{
+  "install": [
+    "svelte"
+  ],
+  "plugins": [
+    ["@snowpack/plugin-svelte", {
+      "generate": "dom"
+    }]
+  ],
+  "devOptions": {
+    "port": 3002,
+    "out": "build/client",
+    "open": "none"
+  },
+  "mount": {
+    "src": "/_dist_/",
+    "public": "/"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "install": [
+    "svelte"
+  ],
+  "plugins": [
+    ["@snowpack/plugin-svelte", {
+      "generate": "ssr"
+    }]
+  ],
+  "devOptions": {
+    "port": 3001,
+    "out": "build/server",
+    "open": "none",
+    "hmr": false,
+    "secure": false
+  },
+  "mount": {
+    "src": "/"
+  }
+}
