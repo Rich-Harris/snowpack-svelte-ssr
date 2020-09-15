@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "node scripts/dev",
+    "start": "node tasks/dev",
     "build": "snowpack build --config snowpack/server.config.json && snowpack build --config snowpack/client.config.json",
     "test": "jest"
   },
@@ -11,12 +11,14 @@
     "@snowpack/app-scripts-svelte": "^1.8.4",
     "@testing-library/jest-dom": "^5.5.0",
     "@testing-library/svelte": "^3.0.0",
+    "chokidar": "^3.4.2",
     "http-proxy": "^1.18.1",
     "httpie": "^1.1.2",
     "jest": "^26.2.2",
     "magic-string": "^0.25.7",
     "meriyah": "^2.1.1",
     "snowpack": "^2.11.0",
-    "svelte-check": "^1.0.0"
+    "svelte-check": "^1.0.0",
+    "tiny-glob": "^0.2.6"
   }
 }

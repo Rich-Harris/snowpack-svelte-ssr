@@ -1,4 +1,6 @@
 .build
-build
-web_modules
-node_modules
+/build
+/web_modules
+/node_modules
+/scratch
+/sapper/routes.js

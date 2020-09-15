@@ -4,7 +4,8 @@
   ],
   "plugins": [
     ["@snowpack/plugin-svelte", {
-      "generate": "dom"
+      "generate": "dom",
+      "hydratable": true
     }]
   ],
   "devOptions": {
@@ -13,7 +14,12 @@
     "open": "none"
   },
   "mount": {
-    "src": "/_dist_/",
+    "routes": "/_routes/",
+    "sapper": "/_sapper/",
+    "shared": "/shared/",
     "public": "/"
+  },
+  "alias": {
+    "@shared": "./shared"
   }
 }

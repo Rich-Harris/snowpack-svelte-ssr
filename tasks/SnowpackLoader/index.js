@@ -2,14 +2,8 @@ const { get } = require('httpie');
 const meriyah = require('meriyah');
 const MagicString = require('magic-string');
 
-function get_hash(str) {
-	let hash = 5381;
-	let i = str.length;
-
-	while(i) hash = (hash * 33) ^ str.charCodeAt(--i);
-	return hash >>> 0;
-}
-
+// This class makes it possible to load modules from the 'server'
+// snowpack server, for the sake of SSR
 module.exports = class SnowpackLoader {
 	constructor() {
 		this.cache = new Map();
@@ -22,17 +16,34 @@ module.exports = class SnowpackLoader {
 			return null;
 		}
 
-		const { data } = await get(url);
+		let data;
+
+		try {
+			({ data } = await get(url));
+		} catch (err) {
+			console.error('>>> error fetching ', url);
+			throw err;
+		}
 
 		const cached = this.cache.get(url);
 		const hash = get_hash(data);
 
-		if (cached && cached.hash === hash) return cached.exports;
+		if (cached && cached.hash === hash) {
+			return cached.exports;
+		}
 
 		const code = new MagicString(data);
-		const ast = meriyah.parseModule(data, {
-			ranges: true
-		});
+		let ast;
+
+		try {
+			ast = meriyah.parseModule(data, {
+				ranges: true
+			});
+		} catch (err) {
+			console.error('>>> error parsing ', url);
+			console.log(data);
+			throw err;
+		}
 
 		const imports = [];
 
@@ -150,4 +161,12 @@ module.exports = class SnowpackLoader {
 
 		return exports;
 	}
+}
+
+function get_hash(str) {
+	let hash = 5381;
+	let i = str.length;
+
+	while(i) hash = (hash * 33) ^ str.charCodeAt(--i);
+	return hash >>> 0;
 }

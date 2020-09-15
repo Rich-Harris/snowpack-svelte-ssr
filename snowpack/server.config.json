@@ -15,6 +15,10 @@
     "secure": false
   },
   "mount": {
-    "src": "/"
+    "routes": "/_routes",
+    "shared": "/shared"
+  },
+  "alias": {
+    "@shared": "./shared"
   }
 }

@@ -1,0 +1,1 @@
+In non-demo circumstances, the `runtime.js` file would live inside `node_modules`. Not sure where `routes.js` would go (not in `node_modules`, as its contents are determined by the contents of the `routes` directory.)
