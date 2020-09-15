@@ -71,6 +71,7 @@ watcher.on('add', update_manifest);
 watcher.on('unlink', update_manifest);
 update_manifest();
 
+// this is our version of a shell index.html file
 const template = ({ html, head, css }) => `<!DOCTYPE html>
 <html lang="en">
 	<head>
