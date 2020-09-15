@@ -26,7 +26,7 @@ As you navigate around, you'll likely see that the browser refreshes the page co
 There are various things not working:
 
 * The aforementioned problem with SSR modules being served to the client
-* The `dev` tasks runs two Snowpack instances in the background, but all their logging gets squelched. Perhaps there's a JavaScript API we could use instead of shelling out to `snowpack`?
+* The `dev` task runs two Snowpack instances in the background, but all their logging gets squelched. Perhaps there's a JavaScript API we could use instead of shelling out to `snowpack`?
 * It would be particularly nice if there were a way to load modules from Snowpack that didn't involve fetching them over HTTP and transforming them
 * HMR doesn't seem to work. Haven't investigated why
 * For now there's only a `dev` task. I haven't yet investigated what the `build` task would look like, though I believe the output of `snowpack build` already makes a very useful input to a set of opinionated 'builders' that would take your Sapper app and turn it into packaged assets + cloud functions for places like Vercel, Netlify and so on.
