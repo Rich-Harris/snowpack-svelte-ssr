@@ -1,3 +1,7 @@
+*Don't draw any conclusions from the existence of this repo! It's purely a space to explore ideas, and is not indicative of anything in particular regarding Sapper's future.*
+
+---
+
 # Snowpack + Svelte + SSR
 
 This is a not-totally-functional experiment to see what it would take to use [Snowpack](https://www.snowpack.dev/) as a base for [Sapper](https://sapper.svelte.dev).
