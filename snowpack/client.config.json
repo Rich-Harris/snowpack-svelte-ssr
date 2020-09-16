@@ -3,10 +3,7 @@
     "svelte"
   ],
   "plugins": [
-    ["@snowpack/plugin-svelte", {
-      "generate": "dom",
-      "hydratable": true
-    }]
+    ["../snowpack/plugins/plugin-svelte"]
   ],
   "devOptions": {
     "port": 3002,

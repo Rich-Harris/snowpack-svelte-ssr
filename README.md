@@ -7,10 +7,19 @@
 This is a not-totally-functional experiment to see what it would take to use [Snowpack](https://www.snowpack.dev/) as a base for [Sapper](https://sapper.svelte.dev).
 
 ```bash
+# 1. Check out a local dev branch of the Snowpack repo
+git clone git@github.com:pikapkg/snowpack
+cd snowpack
+git checkout wip-ssr
+yarn install && yarn build && yarn install --force
+cd ../
+
+# 2. Check out this repo (note: must be a sibling directory to "snowpack")
 git clone git@github.com:Rich-Harris/snowpack-svelte
 cd snowpack-svelte
 npm install
 
+# 3. Start the server
 npm start
 ```
 
@@ -25,10 +34,11 @@ As you navigate around, you'll likely see that the browser refreshes the page co
 
 There are various things not working:
 
-* The aforementioned problem with SSR modules being served to the client
-* The `dev` task runs two Snowpack instances in the background, but all their logging gets squelched. Perhaps there's a JavaScript API we could use instead of shelling out to `snowpack`?
+* ~~The aforementioned problem with SSR modules being served to the client~~
+* ~~HMR doesn't seem to work. Haven't investigated why~~
+* Can this dev server proxy the HMR WebSocket connection to the Snowpack dev server? If so, we can remove the hardcoded `window.HMR_WEBSOCKET_URL =` line.
+* The `dev` task runs a Snowpack instance in the background, but all logging gets squelched. Perhaps there's a JavaScript API we could use instead of shelling out to `snowpack`?
 * It would be particularly nice if there were a way to load modules from Snowpack that didn't involve fetching them over HTTP and transforming them
-* HMR doesn't seem to work. Haven't investigated why
 * For now there's only a `dev` task. I haven't yet investigated what the `build` task would look like, though I believe the output of `snowpack build` already makes a very useful input to a set of opinionated 'builders' that would take your Sapper app and turn it into packaged assets + cloud functions for places like Vercel, Netlify and so on.
 * In Sapper, CSS is injected into the SSR'd page as `<link>` elements that reflect what's depended on by the current page. Subsequently dynamically imported chunks pull in additional `.css` files as needed. This demo is using a slightly cruder mechanism — I haven't yet explored what it would take to get Sapper's behaviour here.
 * I'd like to flesh this demo out a bit more so that it resembles a more fully-fledged Sapper app (with `preload`, layouts, error pages and so on)

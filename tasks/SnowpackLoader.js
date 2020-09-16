@@ -19,7 +19,7 @@ module.exports = class SnowpackLoader {
 		let data;
 
 		try {
-			({ data } = await get(url));
+			({ data } = await get(url+'?ssr=1'));
 		} catch (err) {
 			console.error('>>> error fetching ', url);
 			throw err;

@@ -7,16 +7,21 @@ const chokidar = require('chokidar');
 const glob = require('tiny-glob/sync');
 const SnowpackLoader = require('./SnowpackLoader');
 
-// run two Snowpack servers — one for the server app, one for the client app
-const config_file_server = 'snowpack/server.config.json';
+// run the Snowpack dev server
 const config_file_client = 'snowpack/client.config.json';
-
-const config_server = JSON.parse(fs.readFileSync(config_file_server, 'utf-8'));
 const config_client = JSON.parse(fs.readFileSync(config_file_client, 'utf-8'));
+const snowpackBin = path.resolve(__dirname, '../../snowpack/snowpack/pkg/dist-node/index.bin.js');
+const childProcess = child_process.spawn(snowpackBin, ['dev', `--config=${config_file_client}`, '--reload']);
 
-const snowpack = 'node_modules/.bin/snowpack';
-child_process.spawn(snowpack, ['dev', `--config=${config_file_server}`, '--reload']);
-child_process.spawn(snowpack, ['dev', `--config=${config_file_client}`, '--reload']);
+// SNOWPACK LOGGING, USEFUL FOR DEBUGGING SNOWPACK ISSUES
+// childProcess.stdout.setEncoding('utf8');
+// childProcess.stdout.on('data', function(data) {
+//     console.log('stdout: ' + data);
+// });
+// childProcess.stderr.setEncoding('utf8');
+// childProcess.stderr.on('data', function(data) {
+//     console.log('stderr: ' + data);
+// });
 
 // proxy requests for assets (i.e. not page requests, which are SSR'd)
 // to the 'client' snowpack server
@@ -85,6 +90,7 @@ const template = ({ html, head, css }) => `<!DOCTYPE html>
 	<body>
 		${html}
 		<script type="module" src="/_sapper/runtime.js"></script>
+		<script>window.HMR_WEBSOCKET_URL = "ws://localhost:3002"</script>
 	</body>
 </html>`;
 
@@ -94,7 +100,7 @@ http.createServer(async (req, res) => {
 	// if this is an SSR request (URL matches one of the routes),
 	// load the module in question and render the page...
 	if (route && req.headers.upgrade !== 'websocket') {
-		const mod = await loader.load(`http://localhost:${config_server.devOptions.port}/_routes/${route.file.replace('.svelte', '.js')}`);
+		const mod = await loader.load(`http://localhost:${config_client.devOptions.port}/_routes/${route.file.replace('.svelte', '.js')}`);
 
 		const match = route.pattern.exec(req.url);
 		const props = {};
@@ -102,7 +108,6 @@ http.createServer(async (req, res) => {
 			props[name] = match[i + 1];
 		});
 		const rendered = template(mod.default.render(props));
-
 		res.setHeader('Content-Type', 'text/html');
 		res.end(rendered);
 

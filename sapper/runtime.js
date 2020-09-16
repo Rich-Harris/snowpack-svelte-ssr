@@ -24,8 +24,6 @@ async function start() {
 
 		// TODO handle preload
 
-		// This often doesn't work, because Snowpack's caching mechanism
-		// gets the SSR and DOM modules mixed up
 		component = new page.default({
 			target: document.body,
 			hydrate: true,
