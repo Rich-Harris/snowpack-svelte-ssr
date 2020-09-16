@@ -36,9 +36,9 @@ There are various things not working:
 
 * ~~The aforementioned problem with SSR modules being served to the client~~
 * ~~HMR doesn't seem to work. Haven't investigated why~~
+* ~~The `dev` task runs a Snowpack instance in the background, but all logging gets squelched. Perhaps there's a JavaScript API we could use instead of shelling out to `snowpack`?~~
+* ~~It would be particularly nice if there were a way to load modules from Snowpack that didn't involve fetching them over HTTP and transforming them~~
 * Can this dev server proxy the HMR WebSocket connection to the Snowpack dev server? If so, we can remove the hardcoded `window.HMR_WEBSOCKET_URL =` line.
-* The `dev` task runs a Snowpack instance in the background, but all logging gets squelched. Perhaps there's a JavaScript API we could use instead of shelling out to `snowpack`?
-* It would be particularly nice if there were a way to load modules from Snowpack that didn't involve fetching them over HTTP and transforming them
 * For now there's only a `dev` task. I haven't yet investigated what the `build` task would look like, though I believe the output of `snowpack build` already makes a very useful input to a set of opinionated 'builders' that would take your Sapper app and turn it into packaged assets + cloud functions for places like Vercel, Netlify and so on.
 * In Sapper, CSS is injected into the SSR'd page as `<link>` elements that reflect what's depended on by the current page. Subsequently dynamically imported chunks pull in additional `.css` files as needed. This demo is using a slightly cruder mechanism — I haven't yet explored what it would take to get Sapper's behaviour here.
 * I'd like to flesh this demo out a bit more so that it resembles a more fully-fledged Sapper app (with `preload`, layouts, error pages and so on)
