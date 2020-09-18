@@ -1,30 +1,29 @@
 const http = require('http');
 const fs = require('fs');
-const path = require('path');
-const child_process = require('child_process');
 const http_proxy = require('http-proxy');
 const chokidar = require('chokidar');
 const glob = require('tiny-glob/sync');
 const SnowpackLoader = require('./SnowpackLoader');
 
-// run two Snowpack servers — one for the server app, one for the client app
-const config_file_server = 'snowpack/server.config.json';
+// run the Snowpack dev server
+const snowpack = require('../../snowpack/snowpack/pkg');
+const pkgManifest = require('../package.json');
 const config_file_client = 'snowpack/client.config.json';
+const config = snowpack.unstable__loadAndValidateConfig({config: config_file_client}, pkgManifest);
 
-const config_server = JSON.parse(fs.readFileSync(config_file_server, 'utf-8'));
-const config_client = JSON.parse(fs.readFileSync(config_file_client, 'utf-8'));
-
-const snowpack = 'node_modules/.bin/snowpack';
-child_process.spawn(snowpack, ['dev', `--config=${config_file_server}`, '--reload']);
-child_process.spawn(snowpack, ['dev', `--config=${config_file_client}`, '--reload']);
+// SNOWPACK LOGGING, USEFUL FOR DEBUGGING SNOWPACK ISSUES
+// childProcess.stdout.setEncoding('utf8');
+// childProcess.stdout.on('data', function(data) {
+//     console.log('stdout: ' + data);
+// });
+// childProcess.stderr.setEncoding('utf8');
+// childProcess.stderr.on('data', function(data) {
+//     console.log('stderr: ' + data);
+// });
 
 // proxy requests for assets (i.e. not page requests, which are SSR'd)
 // to the 'client' snowpack server
 const proxy = http_proxy.createProxyServer();
-
-// create a loader that will request files from the 'server' snowpack
-// server, transform them, and evaluate them
-const loader = new SnowpackLoader();
 
 // create and update a route manifest. this is a super basic version
 // of what Sapper does
@@ -85,32 +84,43 @@ const template = ({ html, head, css }) => `<!DOCTYPE html>
 	<body>
 		${html}
 		<script type="module" src="/_sapper/runtime.js"></script>
+		<script>window.HMR_WEBSOCKET_URL = "ws://localhost:3002"</script>
 	</body>
 </html>`;
 
-http.createServer(async (req, res) => {
-	const route = manifest.find(r => r.pattern.test(req.url));
-
-	// if this is an SSR request (URL matches one of the routes),
-	// load the module in question and render the page...
-	if (route && req.headers.upgrade !== 'websocket') {
-		const mod = await loader.load(`http://localhost:${config_server.devOptions.port}/_routes/${route.file.replace('.svelte', '.js')}`);
-
-		const match = route.pattern.exec(req.url);
-		const props = {};
-		route.params.forEach((name, i) => {
-			props[name] = match[i + 1];
-		});
-		const rendered = template(mod.default.render(props));
-
-		res.setHeader('Content-Type', 'text/html');
-		res.end(rendered);
-
-		return;
-	}
-
-	// ...otherwise defer to Snowpack
-	proxy.web(req, res, {
-		target: `http://localhost:${config_client.devOptions.port}`
+(async () => {
+	const {requestHandler: snowpackMiddleware, loadByUrl} = await snowpack.unstable__startServer({
+		cwd: process.cwd(),
+		config,
+		lockfile: null,
+		pkgManifest,
 	});
-}).listen(3000);
+
+	// create a loader that will request files from the 'server' snowpack
+	// server, transform them, and evaluate them
+	const loader = new SnowpackLoader({loadByUrl});
+
+	http.createServer(async (req, res) => {
+		const route = manifest.find(r => r.pattern.test(req.url));
+
+		// if this is an SSR request (URL matches one of the routes),
+		// load the module in question and render the page...
+		if (route && req.headers.upgrade !== 'websocket') {
+			const mod = await loader.load(`/_routes/${route.file.replace('.svelte', '.js')}`);
+
+			const match = route.pattern.exec(req.url);
+			const props = {};
+			route.params.forEach((name, i) => {
+				props[name] = match[i + 1];
+			});
+			const rendered = template(mod.default.render(props));
+			res.setHeader('Content-Type', 'text/html');
+			res.end(rendered);
+
+			return;
+		}
+
+		// ...otherwise defer to Snowpack middleware
+		return snowpackMiddleware(req, res);
+	}).listen(3000);
+})();

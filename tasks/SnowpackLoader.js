@@ -1,11 +1,11 @@
-const { get } = require('httpie');
 const meriyah = require('meriyah');
 const MagicString = require('magic-string');
 
 // This class makes it possible to load modules from the 'server'
 // snowpack server, for the sake of SSR
 module.exports = class SnowpackLoader {
-	constructor() {
+	constructor({loadByUrl}) {
+		this.loadByUrl = loadByUrl;
 		this.cache = new Map();
 	}
 
@@ -19,7 +19,7 @@ module.exports = class SnowpackLoader {
 		let data;
 
 		try {
-			({ data } = await get(url));
+			( data = await this.loadByUrl(url, {isSSR: true}));
 		} catch (err) {
 			console.error('>>> error fetching ', url);
 			throw err;
@@ -101,8 +101,8 @@ module.exports = class SnowpackLoader {
 
 		const deps = [];
 		imports.forEach(node => {
-			const resolved = new URL(node.source.value, url);
-			const promise = this.load(resolved.href);
+			const resolved = new URL(node.source.value, `http://localhost${url}`);
+			const promise = this.load(resolved.pathname);
 
 			if (node.type === 'ExportAllDeclaration' || node.type === 'ExportNamedDeclaration') {
 				// `export * from './other.js'` or `export { foo } from './other.js'`
